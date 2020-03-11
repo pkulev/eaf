@@ -1,9 +1,21 @@
 [tool.poetry]
 name = "eaf"
-version = "0.1.0"
+version = "0.1.1"
 description = "Enterprise Application Framework"
 authors = ["Pavel Kulyov <kulyov.pavel@gmail.com>"]
 license = "MIT"
+readme = "README.rst"
+
+repository = "https://github.com/pkulev/eaf"
+homepage = "https://github.com/pkulev/eaf"
+
+keywords = ["application", "framework"]
+
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Operating System :: POSIX :: Linux",
+]
 
 [tool.poetry.dependencies]
 python = "^3.7"
