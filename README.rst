@@ -1,4 +1,4 @@
-|Build Status| |codecov.io|
+|PyPI| |Build Status| |codecov.io|
 
 ===
 EAF
@@ -49,6 +49,8 @@ Documentation
 
 * **To be added**
 
+.. |PyPI| image:: https://badge.fury.io/py/eaf.svg
+   :target: https://badge.fury.io/py/eaf
 .. |Build Status| image:: https://github.com/pkulev/eaf/workflows/CI/badge.svg
 .. |codecov.io| image:: http://codecov.io/github/pkulev/eaf/coverage.svg?branch=master
    :target: http://codecov.io/github/pkulev/eaf?branch=master
