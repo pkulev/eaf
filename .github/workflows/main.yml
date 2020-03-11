@@ -31,4 +31,7 @@ jobs:
       run: poetry run black . --check
 
     - name: run tests
-      run: poetry run pytest --cov=./eaf --cov-report=term -s -v tests
+      run: poetry run pytest --cov=./eaf --cov-report=xml -s -v tests
+
+    - name: upload coverage
+      uses: codecov/codecov-action@v1
