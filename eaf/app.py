@@ -53,7 +53,7 @@ class Application:
         self._pc = ioloop.PeriodicCallback(lambda: tick()(), 30)
         self._pc.start()
 
-        if Application.__instance__ is None:
+        if Application.__instance__ is None or Application.__instance__() is None:
             Application.__instance__ = weakref.ref(self)
 
     def tick(self):
