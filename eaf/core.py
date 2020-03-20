@@ -8,7 +8,7 @@ from typing import Type
 class Vec3(object):
     """3D vector representation."""
 
-    __slots__ = ["x", "y", "z"]
+    __slots__ = ("x", "y", "z")
 
     def __init__(self, x=0, y=0, z=0):
         self.x = x
@@ -51,6 +51,15 @@ class Vec3(object):
         else:
             raise self._value_error("mul", other)
 
+    # FIXME: it's quite unusual to divide vectors
+    def __truediv__(self, other):
+        if isinstance(other, (int, float)):
+            return Vec3(x=self.x / other, y=self.y / other, z=self.z / other)
+        else:
+            raise self._value_error("div", other)
+
+    __div__ = __truediv__
+
     def __eq__(self, other):
         if not isinstance(other, Vec3):
             raise self._value_error("eq", other)
@@ -58,6 +67,17 @@ class Vec3(object):
         return self.x == other.x and self.y == other.y and self.z == other.z
 
     def __getitem__(self, cons: Type) -> Vec3:
-        """Cast Point to selected type."""
+        """Cast vector items to selected type."""
 
         return Vec3(x=cons(self.x), y=cons(self.y), z=cons(self.z))
+
+    def as_tuple2(self) -> tuple:
+        """Return x and y as tuple."""
+
+        return (self.x, self.y)
+
+    def as_tuple3(self) -> tuple:
+
+        return (self.x, self.y, self.z)
+
+    as_tuple = as_tuple3
