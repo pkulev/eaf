@@ -42,7 +42,11 @@ Testing
 
    $ poetry run pytest -s -v tests/  # run all tests
    $ poetry run pytest --cov=eaf -s -v tests/  # run all tests with coverage
-
+   $ poetry run black eaf/ tests/  # autoformat code
+   $ # run type checking
+   $ poetry run pytest --mypy --mypy-ignore-missing-imports -s -v eaf/ tests/
+   $ # run code linting
+   $ poetry run pytest --pylint -s -v eaf/ tests/
 
 Documentation
 -------------

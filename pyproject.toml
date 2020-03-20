@@ -20,6 +20,7 @@ classifiers = [
 [tool.poetry.dependencies]
 python = "^3.7"
 tornado = "^6.0.4"
+pytest-mypy = "^0.6.0"
 
 [tool.poetry.dev-dependencies]
 black = "^19.10b0"
