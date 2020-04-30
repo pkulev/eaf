@@ -31,6 +31,9 @@ class Renderable(metaclass=ABCMeta):
     # TODO: this is not the place too (ncurses-specific)
     draw_on_border = False
 
+    def __init__(self):
+        self._image = None
+
     # TODO: Renderable must return some object with clean interface
     @abstractmethod
     def get_render_data(self):
@@ -49,6 +52,11 @@ class Renderable(metaclass=ABCMeta):
     @classmethod
     def type(cls):
         return cls.__name__
+
+    # TODO: fix sometimes
+    @property
+    def image(self):
+        return self._image
 
     # TODO: this is bad designed thing
     def remove_obsolete(self, pos: Vec3):
