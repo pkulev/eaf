@@ -100,3 +100,9 @@ class Renderer:
 
     def present(self):
         pass
+
+    def get_width(self):
+        pass
+
+    def get_height(self):
+        pass
