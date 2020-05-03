@@ -20,7 +20,7 @@ def test_state(mock_application):
     with pytest.raises(NotImplementedError):
         state.events()
 
-    assert not state.update()
+    assert not state.update(0)
     assert not state.render()
 
     assert state._objects == []

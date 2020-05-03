@@ -65,8 +65,10 @@ class Application:
         if not self._state:
             return
 
+        dt = self._clock.tick()
+
         self._state.events()
-        self._state.update()
+        self._state.update(dt)
         self._state.render()
 
         self._frames += 1

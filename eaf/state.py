@@ -65,7 +65,7 @@ class State:
         "Event handler, called by `Application.loop` method."
         raise NotImplementedError
 
-    def update(self):
+    def update(self, dt: int):
         """Update handler, called every frame."""
 
         for obj in self._objects:
