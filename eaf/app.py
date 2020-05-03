@@ -47,6 +47,7 @@ class Application:
         self._state: Optional[State] = None
         self._states: Dict[str, State] = {}
         self._fps = 30
+        self._frames = 0
 
         self._ioloop = ioloop.IOLoop.current()
         tick = weakref.WeakMethod(self.tick)
@@ -65,6 +66,8 @@ class Application:
         self._state.events()
         self._state.update()
         self._state.render()
+
+        self._frames += 1
 
     @classmethod
     def current(cls) -> Application:
@@ -168,6 +171,12 @@ class Application:
         """Desired FPS setter."""
 
         self._fps = int(val)
+
+    @property
+    def frame_count(self) -> int:
+        """The total number of frames have passed from the application start."""
+
+        return self._frames
 
     def start(self):
         """Start main application loop."""
