@@ -22,6 +22,7 @@ from tornado import ioloop
 import eaf.core
 import eaf.errors
 
+from eaf.clock import Clock
 from eaf.render import Renderer
 
 
@@ -47,6 +48,7 @@ class Application:
         self._state: Optional[State] = None
         self._states: Dict[str, State] = {}
         self._fps = 30
+        self._clock = Clock()
         self._frames = 0
 
         self._ioloop = ioloop.IOLoop.current()
@@ -177,6 +179,12 @@ class Application:
         """The total number of frames have passed from the application start."""
 
         return self._frames
+
+    @property
+    def clock(self) -> Clock:
+        """Return clock object used by Application."""
+
+        return self._clock
 
     def start(self):
         """Start main application loop."""
