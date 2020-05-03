@@ -41,19 +41,22 @@ class Application:
     __instance__ = None
     """Instance of the current application."""
 
-    def __init__(self, renderer: Renderer = Renderer("dummy"), event_queue=None):
+    def __init__(
+        self, renderer: Renderer = Renderer("dummy"), event_queue=None, fps: int = 30
+    ):
         self._renderer = renderer
         self._event_queue = event_queue
 
         self._state: Optional[State] = None
         self._states: Dict[str, State] = {}
-        self._fps = 30
+        self._fps = fps
+
         self._clock = Clock()
         self._frames = 0
 
         self._ioloop = ioloop.IOLoop.current()
         tick = weakref.WeakMethod(self.tick)
-        self._pc = ioloop.PeriodicCallback(lambda: tick()(), 30)
+        self._pc = ioloop.PeriodicCallback(lambda: tick()(), fps)
         self._pc.start()
 
         if Application.__instance__ is None or Application.__instance__() is None:
