@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "eaf"
-version = "0.1.5"
+version = "0.2.0"
 description = "Enterprise Application Framework"
 authors = ["Pavel Kulyov <kulyov.pavel@gmail.com>"]
 license = "MIT"
