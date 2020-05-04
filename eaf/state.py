@@ -69,7 +69,7 @@ class State:
         """Update handler, called every frame."""
 
         for obj in self._objects:
-            obj.update()
+            obj.update(dt)
 
     def render(self):
         """Render handler, called every frame."""
