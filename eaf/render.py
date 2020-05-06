@@ -53,6 +53,10 @@ class Renderable(metaclass=ABCMeta):
     def image(self, image):
         self._image = image
 
+    @property
+    def type(self) -> str:
+        return self.__class__.__name__
+
     # TODO: Renderable must return some object with clean interface
     @abstractmethod
     def get_render_data(self):
@@ -66,11 +70,6 @@ class Renderable(metaclass=ABCMeta):
             Example: (Vec3(x=5, y=5), "*", curses.A_BOLD)
         """
         pass
-
-    # TODO: this is the wrong place
-    @classmethod
-    def type(cls):
-        return cls.__name__
 
     # TODO: this is not the place too
     def get_renderable_objects(self) -> List[Renderable]:
