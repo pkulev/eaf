@@ -22,7 +22,6 @@ class Renderable(metaclass=ABCMeta):
     * render_priority (int): priority for renderer, greater -> rendered later
 
     * draw_on_border (bool): allow or not drawing on border
-    if not allowed - renderer will send remove_obsolete signal to object
     """
 
     # TODO: this is not the place
@@ -57,19 +56,6 @@ class Renderable(metaclass=ABCMeta):
     @property
     def image(self):
         return self._image
-
-    # TODO: this is bad designed thing
-    def remove_obsolete(self, pos: Vec3):
-        """Remove obsolete signal.
-
-        Every renderable object must remove old bullets that places behind
-        border (field for rendering).
-
-        If object will never change its coordinates it may not implement this
-        method.
-        """
-
-        pass
 
     # TODO: this is not the place too
     def get_renderable_objects(self) -> List[Renderable]:
