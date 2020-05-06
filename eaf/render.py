@@ -30,8 +30,28 @@ class Renderable(metaclass=ABCMeta):
     # TODO: this is not the place too (ncurses-specific)
     draw_on_border = False
 
-    def __init__(self):
+    def __init__(self, pos: Vec3):
+        self._pos = pos
+
+        # Image is not required by constructor, but renderable entity should
+        # provide it via setter or directly assign to _image.
         self._image = None
+
+    @property
+    def pos(self) -> Vec3:
+        return self._pos
+
+    @pos.setter
+    def pos(self, pos: Vec3):
+        self._pos = pos
+
+    @property
+    def image(self):
+        return self._image
+
+    @image.setter
+    def image(self, image):
+        self._image = image
 
     # TODO: Renderable must return some object with clean interface
     @abstractmethod
@@ -51,11 +71,6 @@ class Renderable(metaclass=ABCMeta):
     @classmethod
     def type(cls):
         return cls.__name__
-
-    # TODO: fix sometimes
-    @property
-    def image(self):
-        return self._image
 
     # TODO: this is not the place too
     def get_renderable_objects(self) -> List[Renderable]:
