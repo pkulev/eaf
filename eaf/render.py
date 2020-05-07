@@ -27,15 +27,11 @@ class Renderable(metaclass=ABCMeta):
     * compound (bool): if object consists of other renderables
 
     * render_priority (int): priority for renderer, greater -> rendered later
-
-    * draw_on_border (bool): allow or not drawing on border
     """
 
     # TODO: this is not the place
     compound = False
     render_priority = 0
-    # TODO: this is not the place too (ncurses-specific)
-    draw_on_border = False
 
     def __init__(self, pos: Vec3):
         self._pos = pos
