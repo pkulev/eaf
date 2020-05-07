@@ -12,6 +12,13 @@ if typing.TYPE_CHECKING:
     from eaf.core import Vec3
 
 
+class Image(metaclass=ABCMeta):
+    """Base image class.
+
+    Image must implement protocol between Renderer and Renderable itself.
+    """
+
+
 class Renderable(metaclass=ABCMeta):
     """Base class for renderable objects.
 
@@ -46,11 +53,11 @@ class Renderable(metaclass=ABCMeta):
         self._pos = pos
 
     @property
-    def image(self):
+    def image(self) -> Image:
         return self._image
 
     @image.setter
-    def image(self, image):
+    def image(self, image: Image):
         self._image = image
 
     @property

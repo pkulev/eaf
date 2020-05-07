@@ -8,12 +8,13 @@ Also means Extensible As Fuck.
 
 from eaf.app import Application
 from eaf.core import Vec3
-from eaf.render import Renderer, Renderable
+from eaf.render import Image, Renderer, Renderable
 from eaf.state import State
 
 
 __all__ = [
     Application.__name__,
+    Image.__name__,
     Renderable.__name__,
     Renderer.__name__,
     State.__name__,
