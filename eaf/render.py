@@ -60,20 +60,6 @@ class Renderable(metaclass=ABCMeta):
     def type(self) -> str:
         return self.__class__.__name__
 
-    # TODO: Renderable must return some object with clean interface
-    @abstractmethod
-    def get_render_data(self):
-        """Renderable.get_render_data(None) -> (gpos_list, data_gen)
-
-        Every renderable object must return tuple consist of:
-            * gpos_list: list of every Surface's global positions
-            Example: [Vec3(x=5, y=5), Vec3(x=10, y=10)]
-
-            * data_gen: generator which yields tuple (lpos, image, style)
-            Example: (Vec3(x=5, y=5), "*", curses.A_BOLD)
-        """
-        pass
-
     # TODO: this is not the place too
     def get_renderable_objects(self) -> List[Renderable]:
         """If object is compound it must return its renderable objects."""
