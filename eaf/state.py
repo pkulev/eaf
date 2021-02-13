@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 import typing
-
+from operator import attrgetter
 from typing import List, Sequence, Union, Iterable
 
 
@@ -94,15 +94,17 @@ class State:
 
         obj = list(obj) if isinstance(obj, list) else [obj]
         self._objects += obj
-        LOG.debug("%s", obj)
+        LOG.debug(f"Adding {obj} to state {self}")
 
         # TODO: Because we don't have common GameObject interface
         # This is temporary smellcode
         for item in obj:
             if item.compound:
                 subitems = item.get_renderable_objects()
-                LOG.debug("Subitems: %s", subitems)
+                LOG.debug(f"Adding subitems: {subitems}")
                 self._objects += subitems
+
+        self._objects.sort(key=attrgetter("render_priority"))
 
     def remove(self, obj: Renderable):
         """Remove object from State's list of objects.
@@ -122,3 +124,6 @@ class State:
             LOG.exception("Object %s is not in State's object list.", obj)
         finally:
             del obj
+
+    def __str__(self):
+        return f"{self.__class__.__name__}"
