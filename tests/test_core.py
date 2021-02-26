@@ -5,7 +5,7 @@ import pytest
 from eaf.core import Vec3
 
 
-def test_vec3_operationa():
+def test_vec3_operations():
     ax, ay, az = 10, 10, 10
     bx, by, bz = 20, 20, 20
     a = Vec3(ax, ay, az)
@@ -53,4 +53,6 @@ def test_vec3_operationa():
     assert a + b == Vec3(0, 0, 0)
     assert a + Vec3(-50, -50, -50) == Vec3(-30, -30, -30)
 
+    assert Vec3() == Vec3(0, 0, 0)
+    assert str(Vec3()[float]) == "Vec3(x=0.0, y=0.0, z=0.0)"
     assert Vec3(1.9, 1.9)[int] == Vec3(1, 1, 0)

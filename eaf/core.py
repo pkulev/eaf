@@ -13,7 +13,15 @@ class Object:
 
 
 class Vec3:
-    """3D vector representation."""
+    """3D vector representation.
+
+    Defaults are integer zeroes, but you can use float values too.
+    To cast vector to any support type use subscription:
+    >>> Vec3(0, 0, 0)[float]
+    Vec3(0.0, 0.0, 0.0)
+
+    Supported types for operations are: ``int``, ``float``, ``Vec3``.
+    """
 
     __slots__ = ("x", "y", "z")
 
