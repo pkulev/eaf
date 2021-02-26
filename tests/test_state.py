@@ -12,7 +12,6 @@ def test_state(mock_application):
 
     assert state.app is app
     assert state.actor is None
-    assert state._renderer is app.renderer
 
     assert not state.postinit()
     assert not state.trigger()
