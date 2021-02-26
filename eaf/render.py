@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import typing
+from abc import ABCMeta
+from typing import List, Optional
 
-from .core import Object
+from eaf.obj import Object
 
 
 if typing.TYPE_CHECKING:
@@ -19,23 +21,13 @@ class Image:
 
 
 class Renderable(Object):
-    """Base class for renderable objects.
-
-    .. class-variables::
-
-    * compound:
-    * render_priority: priority for renderer, greater -> rendered later
-    """
-
-    # TODO: this is not the place
-    compound: bool = False
-    """Whether an object consists of other renderables."""
+    """Base class for renderable objects."""
 
     render_priority: int = 0
-    """A priority value for renderer, greater -> rendered later."""
+    """Priority for renderer, greater -> rendered later."""
 
-    def __init__(self, pos: Vec3) -> None:
-        self._pos = pos
+    def __init__(self, pos: Vec3 | None = None) -> None:
+        super().__init__(pos)
 
         # Image is not required by constructor, but renderable entity should
         # provide it via setter or directly assign to _image.
@@ -63,16 +55,6 @@ class Renderable(Object):
         """Image setter."""
 
         self._image = image
-
-    @property
-    def type(self) -> str:
-        return self.__class__.__name__
-
-    # TODO: this is not the place too
-    def get_renderable_objects(self) -> list[Renderable]:
-        """If object is compound it must return its renderable objects."""
-
-        raise NotImplementedError()
 
 
 class Renderer:
