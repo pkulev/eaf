@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import typing
+from abc import ABCMeta
+from typing import List, Optional
 
-from abc import ABCMeta, abstractmethod
-from typing import List
+from eaf.obj import Object
 
 
 if typing.TYPE_CHECKING:
@@ -19,34 +20,18 @@ class Image(metaclass=ABCMeta):
     """
 
 
-class Renderable(metaclass=ABCMeta):
-    """Base class for renderable objects.
+class Renderable(Object):
+    """Base class for renderable objects."""
 
-    .. class-variables::
+    render_priority: int = 0
+    """Priority for renderer, greater -> rendered later."""
 
-    * compound (bool): if object consists of other renderables
-
-    * render_priority (int): priority for renderer, greater -> rendered later
-    """
-
-    # TODO: this is not the place
-    compound = False
-    render_priority = 0
-
-    def __init__(self, pos: Vec3):
-        self._pos = pos
+    def __init__(self, pos: Optional[Vec3] = None):
+        super().__init__(pos)
 
         # Image is not required by constructor, but renderable entity should
         # provide it via setter or directly assign to _image.
-        self._image = None
-
-    @property
-    def pos(self) -> Vec3:
-        return self._pos
-
-    @pos.setter
-    def pos(self, pos: Vec3):
-        self._pos = pos
+        self._image: Optional[Image] = None
 
     @property
     def image(self) -> Image:
@@ -55,16 +40,6 @@ class Renderable(metaclass=ABCMeta):
     @image.setter
     def image(self, image: Image):
         self._image = image
-
-    @property
-    def type(self) -> str:
-        return self.__class__.__name__
-
-    # TODO: this is not the place too
-    def get_renderable_objects(self) -> List[Renderable]:
-        """If object is compound it must return its renderable objects."""
-
-        pass
 
 
 class Renderer:
