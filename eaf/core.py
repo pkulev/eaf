@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Type
-
 
 class Vec3(object):
     """3D vector representation."""

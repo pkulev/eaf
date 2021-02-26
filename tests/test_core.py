@@ -1,3 +1,5 @@
+"""Tests for eaf.core module."""
+
 import pytest
 
 from eaf.core import Vec3
