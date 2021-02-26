@@ -3,8 +3,16 @@
 from __future__ import annotations
 
 
-class Vec3(object):
-    """3D vector representation."""
+class Vec3:
+    """3D vector representation.
+
+    Defaults are integer zeroes, but you can use float values too.
+    To cast vector to any support type use subscription:
+    >>> Vec3(0, 0, 0)[float]
+    Vec3(0.0, 0.0, 0.0)
+
+    Supported types for operations are: ``int``, ``float``, ``Vec3``.
+    """
 
     __slots__ = ("x", "y", "z")
 
@@ -14,7 +22,7 @@ class Vec3(object):
         self.z = z
 
     def __repr__(self) -> str:
-        return "Vec3(x={0}, y={1}, z={2})".format(self.x, self.y, self.z)
+        return f"Vec3(x={self.x}, y={self.y}, z={self.z})"
 
     __str__ = __repr__
 
@@ -22,9 +30,7 @@ class Vec3(object):
     def _value_error(operation, value):
         """Raise ValueError with appropriate message."""
 
-        return ValueError(
-            "Wrong type to {0} {1}: {2}".format(operation, type(value), value)
-        )
+        return ValueError(f"Wrong type to {operation} {type(value)}: {value}")
 
     def __add__(self, other):
         if isinstance(other, (int, float)):
