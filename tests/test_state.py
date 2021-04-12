@@ -22,5 +22,5 @@ def test_state(mock_application):
     assert not state.update(0)
     assert not state.render()
 
-    assert state._objects == []
+    assert state.objects == []
     # TODO: add tests for add and remove

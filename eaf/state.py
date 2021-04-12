@@ -4,19 +4,20 @@ from __future__ import annotations
 
 import logging
 import typing
-from operator import attrgetter
-from typing import List, Sequence, Union, Iterable
+from typing import List, Union
+
+from eaf.node import Node
 
 
 if typing.TYPE_CHECKING:
     from eaf.app import Application
-    from eaf.render import Renderer, Renderable
+    from eaf.obj import Object
 
 
 LOG = logging.getLogger(__name__)
 
 
-class State:
+class State(Node):
     """Base class for application states.
 
     State is a container for objects. User should add and remove objects via
@@ -26,12 +27,10 @@ class State:
 
     def __init__(self, app: Application):
         LOG.info("Instantiating %s state.", self.__class__.__name__)
+        super().__init__()
 
         self._app = app
-        self._renderer: Renderer = app.renderer
         self._actor = None
-
-        self._objects: List[Renderable] = []
 
     def postinit(self):
         """Do all instantiations that require prepared State object."""
@@ -42,7 +41,8 @@ class State:
         """Common way to get useful information for triggered state."""
 
         LOG.debug(
-            "Triggering %s state with %s and %s", self.__class__.__name__, args, kwargs
+            "Triggering %s state with %s and %s", self.__class__.__name__,
+            args, kwargs
         )
 
     @property
@@ -61,6 +61,12 @@ class State:
 
         self._actor = val
 
+    @property
+    def objects(self):
+        """State's objects getter."""
+
+        return self.nodes
+
     def events(self):
         "Event handler, called by `Application.loop` method."
         raise NotImplementedError
@@ -68,60 +74,41 @@ class State:
     def update(self, dt: int):
         """Update handler, called every frame."""
 
-        for obj in self._objects:
+        for obj in self.objects:
             obj.update(dt)
 
     def render(self):
         """Render handler, called every frame."""
 
-        self._renderer.clear()
-        self._renderer.render_objects(self._objects)
-        self._renderer.present()
+        self.app.renderer.clear()
+        self.app.renderer.render_objects(self.objects)
+        self.app.renderer.present()
 
-    # TODO: [object-system]
-    #  * implement GameObject common class for using in states
-    #  * generalize interaction with game objects and move `add` to base class
-    # ATTENTION: renderables that added by another objects in runtime will not
-    #  render at the screen, because they must register in state via this func
-    #  as others. This is temporary decision as attempt to create playable game
-    #  due to deadline.
-    def add(self, obj: Union[Renderable, List[Renderable]]):
+    # pylint: disable=arguments-differ
+    def add(self, obj: Union[Object, List[Object]]):
         """Add GameObject to State's list of objects.
 
-        State will call GameObject.update() and pass to render all it's objects
+        State will call Object.update(dt) and pass to render all it's objects
         every frame.
         """
 
         obj = list(obj) if isinstance(obj, list) else [obj]
-        self._objects += obj
-        LOG.debug(f"Adding {obj} to state {self}")
 
-        # TODO: Because we don't have common GameObject interface
-        # This is temporary smellcode
-        for item in obj:
-            if item.compound:
-                subitems = item.get_renderable_objects()
-                LOG.debug(f"Adding subitems: {subitems}")
-                self._objects += subitems
+        LOG.debug("[%s] Adding %s", self, obj)
+        super().add(obj)
 
-        self._objects.sort(key=attrgetter("render_priority"))
-
-    def remove(self, obj: Renderable):
-        """Remove object from State's list of objects.
+    def remove(self, obj: Object):
+        """Remove object from State's object tree.
 
         Removed objects should be collected by GC.
         """
 
-        LOG.debug("%s", obj)
+        LOG.debug("[%s]: removing %s", obj)
 
         try:
-            if obj.compound:
-                for subobj in obj.get_renderable_objects():
-                    self._objects.remove(subobj)
-                    del subobj
-            self._objects.remove(obj)
+            super().remove(obj)
         except ValueError:
-            LOG.exception("Object %s is not in State's object list.", obj)
+            LOG.exception("Object %s is not in State's object tree.", obj)
         finally:
             del obj
 
