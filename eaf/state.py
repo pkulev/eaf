@@ -6,17 +6,18 @@ import logging
 import typing
 from operator import attrgetter
 
+from eaf.node import Node
+
 
 if typing.TYPE_CHECKING:
     from eaf.app import Application
-    from eaf.core import Object
-    from eaf.render import Renderable
+    from eaf.obj import Object
 
 
 LOG = logging.getLogger(__name__)
 
 
-class State:
+class State(Node):
     """Base class for application states.
 
     State is a container for objects. User should add and remove objects via
@@ -26,13 +27,10 @@ class State:
 
     def __init__(self, app: Application) -> None:
         LOG.info("Instantiating %s state.", self.__class__.__name__)
+        super().__init__()
 
         self._app = app
         self._actor = None
-
-        # TODO: Object, not nescessarily Renderable!
-        self._objects: list[Object] = []
-        self._renderable: list[Renderable] = []
 
     def postinit(self) -> None:
         """Do all instantiations that require prepared State object."""
@@ -62,7 +60,13 @@ class State:
 
         self._actor = val
 
-    def events(self) -> None:
+    @property
+    def objects(self) -> list[Node]:
+        """State's objects getter."""
+
+        return self.nodes
+
+    def events(self) -> none:
         """Event handler, called by `Application.loop` method."""
 
         raise NotImplementedError()
@@ -70,59 +74,43 @@ class State:
     def update(self, dt: int) -> None:
         """Update handler, called every frame."""
 
-        for obj in self._objects:
+        for obj in self.objects:
             obj.update(dt)
 
     def render(self) -> None:
         """Render handler, called every frame."""
 
         self.app.renderer.clear()
-        self.app.renderer.render_objects(self._objects)
+        self.app.renderer.render_objects(self.objects)
         self.app.renderer.present()
 
-    # TODO: [object-system]
-    #  * implement GameObject common class for using in states
-    #  * generalize interaction with game objects and move `add` to base class
-    # ATTENTION: renderables that added by another objects in runtime will not
-    #  render at the screen, because they must register in state via this func
-    #  as others. This is temporary decision as attempt to create playable game
-    #  due to deadline.
-    def add(self, obj: Renderable | list[Renderable]) -> None:
-        """Add Object to State's list of objects.
+    # pylint: disable=arguments-differ
+    def add(self, obj: Object | list[Object]) -> None:
+        """Add GameObject to State's list of objects.
 
-        State will call Object.update() and pass to the renderer all renderables every frame.
+        State will call Object.update(dt) and pass to render all it's objects
+        every frame.
         """
 
         obj = list(obj) if isinstance(obj, list) else [obj]
-        self._objects += obj
-        LOG.debug(f"Adding {obj} to state {self}")
 
-        # TODO: Because we don't have common GameObject interface
-        # This is temporary smellcode
-        for item in obj:
-            if item.compound:
-                subitems = item.get_renderable_objects()
-                LOG.debug(f"Adding subitems: {subitems}")
-                self._objects += subitems
+        LOG.debug("[%s] Adding %s", self, obj)
+        super().add(obj)
 
         self._objects.sort(key=attrgetter("render_priority"))
 
-    def remove(self, obj: Renderable) -> None:
-        """Remove object from State's list of objects.
+    def remove(self, obj: Object) -> None:
+        """Remove object from State's object tree.
 
         Removed objects should be collected by GC.
         """
 
-        LOG.debug("%s", obj)
+        LOG.debug("[%s]: removing %s", obj)
 
         try:
-            if obj.compound:
-                for subobj in obj.get_renderable_objects():
-                    self._objects.remove(subobj)
-                    del subobj
-            self._objects.remove(obj)
+            super().remove(obj)
         except ValueError:
-            LOG.exception("Object %s is not in State's object list.", obj)
+            LOG.exception("Object %s is not in State's object tree.", obj)
         finally:
             del obj
 
