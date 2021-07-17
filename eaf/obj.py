@@ -13,6 +13,8 @@ class Object(Node):
     managers.
     """
 
+    default_name_template = "Object"
+
     def __init__(self, pos: Vec3 | None = None) -> None:
         super().__init__()
 

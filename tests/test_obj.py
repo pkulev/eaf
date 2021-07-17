@@ -1,3 +1,7 @@
+"""Tests for Object class."""
+
+import uuid
+
 import pytest
 
 from eaf.core import Vec3
@@ -6,6 +10,8 @@ from eaf.obj import Object
 
 def test_object():
     obj = Object()
+    assert obj.name == "Object"
+    assert isinstance(obj.id, uuid.UUID)
     assert obj.pos == Vec3(0, 0, 0)
     obj.pos = Vec3(1, 1, 1)
     assert obj.pos == Vec3(1, 1, 1)

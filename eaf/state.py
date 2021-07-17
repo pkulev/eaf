@@ -6,7 +6,7 @@ import logging
 import typing
 from operator import attrgetter
 
-from eaf.node import Node
+from eaf.node import Node, Tree
 
 
 if typing.TYPE_CHECKING:
@@ -17,7 +17,7 @@ if typing.TYPE_CHECKING:
 LOG = logging.getLogger(__name__)
 
 
-class State(Node):
+class State:
     """Base class for application states.
 
     State is a container for objects. User should add and remove objects via
@@ -31,6 +31,8 @@ class State(Node):
 
         self._app = app
         self._actor = None
+
+        self.scene_graph = Tree()
 
     def postinit(self) -> None:
         """Do all instantiations that require prepared State object."""
@@ -64,7 +66,7 @@ class State(Node):
     def objects(self) -> list[Node]:
         """State's objects getter."""
 
-        return self.nodes
+        return list(self.scene_graph.traverse_breadth())
 
     def events(self) -> none:
         """Event handler, called by `Application.loop` method."""
@@ -85,17 +87,15 @@ class State(Node):
         self.app.renderer.present()
 
     # pylint: disable=arguments-differ
-    def add(self, obj: Object | list[Object]) -> None:
+    def add(self, obj: Object) -> None:
         """Add GameObject to State's list of objects.
 
         State will call Object.update(dt) and pass to render all it's objects
         every frame.
         """
 
-        obj = list(obj) if isinstance(obj, list) else [obj]
-
         LOG.debug("[%s] Adding %s", self, obj)
-        super().add(obj)
+        self.scene_graph.add(obj)
 
         self._objects.sort(key=attrgetter("render_priority"))
 
@@ -105,14 +105,10 @@ class State(Node):
         Removed objects should be collected by GC.
         """
 
-        LOG.debug("[%s]: removing %s", obj)
+        LOG.debug("[%s]: removing %s", self, obj)
 
-        try:
-            super().remove(obj)
-        except ValueError:
-            LOG.exception("Object %s is not in State's object tree.", obj)
-        finally:
-            del obj
+        self.scene_graph.remove(obj)
+        del obj
 
     def __str__(self) -> str:
         return f"{self.__class__.__name__}"
