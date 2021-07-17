@@ -14,6 +14,8 @@ class Object(Node):
     managers.
     """
 
+    default_name_template = "Object"
+
     def __init__(self, pos: Optional[Vec3] = None):
         super().__init__()
 

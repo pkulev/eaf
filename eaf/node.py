@@ -6,24 +6,55 @@ from collections import deque
 from typing import List, Optional, Union
 
 
-class Node:
-    """Tree data structure.
+class OnNodeMixin:
+    """Callback interface for nodes.
 
-    Allows to pass any data via kwargs.
+    Methods are called by the Tree object on particular node actions.
     """
 
-    def __init__(self, name: Optional[str] = None):
-        self._parent = None
-        self._nodes = []
-        self._name = name if name is not None else self._default_name()
+    def on_node_add(self):
+        """Node add callback.
 
-        self._tags = set()
+        Called when node is added to the tree.
+        """
+
+    def on_node_remove(self):
+        """Node remove callback.
+
+        Called when node is removed from the tree.
+        """
+
+    def on_node_reparent(self, new_parent: Node):
+        """Node reparent callback.
+
+        Called when node is reparented to the other node.
+        """
+
+    def on_node_tag(self, tag):
+        """Node tag callback.
+
+        Called when node is tagged.
+        """
+
+    def on_node_untag(self, tag):
+        """Node untag callback.
+
+        Called when node tag is removed.
+        """
+
+
+class TreeDelegateMixin:
+
+    def __init__(self):
+        self._root = None
 
     @property
-    def id(self):
-        """Identificator, used for searching and deleting."""
+    def root(self):
+        return self._root
 
-        return id(self)
+    @root.setter
+    def root(self, tree):
+        self._root = tree
 
     @property
     def parent(self) -> Optional[Node]:
@@ -32,19 +63,89 @@ class Node:
         Root node has parent `None`.
         """
 
-        return self._parent
+        if self.root is None:
+            return
+
+        return self.root.parent_for(self)
 
     @parent.setter
     def parent(self, parent: Node):
         """Node's parent setter."""
 
-        self._parent = parent
+        if self.root is None:
+            return
+
+        self.root.reparent(self, parent=parent)
 
     @property
-    def nodes(self) -> List[Node]:
-        """List of node-level children (subnodes)."""
+    def children(self) -> List[Node]:
+        """List of node's children."""
 
-        return self._nodes
+        if self.root is None:
+            return
+
+        return self.root.children_for(self)
+
+    def add(self, children: Union[Node, List[Node]]):
+        """Add node or list of nodes as children of this node instance."""
+
+        nodes = children if isinstance(children, list) else [children]
+
+        for sub in nodes:
+            self.root.add(sub, parent=self)
+
+    def remove(self, node: Union[Node, List[Node]]):
+        """Remove node from the tree.
+
+        Search is done via BFS comparing Node.id properties.
+
+        :param node: tree node or list of nodes
+        """
+
+        if isinstance(node, list):
+            node_ids = {item.id for item in node}
+        else:
+            node_ids = {node.id}
+
+        for sub in self.traverse_breadth():
+            if sub.id in node_ids:
+                sub.parent.children.remove(sub)
+                sub.parent = None
+                del sub
+
+
+class Node(OnNodeMixin, TreeDelegateMixin):
+    """Tree node data structure.
+
+    Supports OnNodeMixin interface allowing to setup own code to be called
+    on certain actions.
+
+    Each node has non-unique name attached, you can override naming behavior
+    using `default_name_template` class variable and `generate_new_name`
+    classmethod.
+
+    For now nodes use behavior that kinda smells: on node insertion three that
+    owns that node assigns itself to `__root__` variable. Thus node can delegate
+    operations to the tree.
+    """
+
+    default_name_template = "Node"
+
+    def __init__(self, name: Optional[str] = None):
+        super().__init__()
+
+        # This link will be set after node insertion
+        self.__root__: Optional[Tree] = None
+
+        self._name = name if name is not None else self.generate_new_name()
+
+        self._tags = set()
+
+    @property
+    def id(self):
+        """Identificator, used for searching and deleting."""
+
+        return id(self)
 
     @property
     def name(self):
@@ -67,23 +168,6 @@ class Node:
 
         return self._tags.copy()
 
-    def add(self, node: Union[Node, List[Node]]):
-        """Add node or list of nodes to the tree."""
-
-        nodes = list(node) if isinstance(node, list) else [node]
-
-        for sub in nodes:
-            sub.parent = self
-            self.nodes.append(sub)
-
-    # TODO:
-    def remove(self, node):
-        for sub in self.traverse_breadth():
-            if sub.id == node.id:
-                sub.parent.nodes.remove(sub)
-                sub.parent = None
-                del sub
-
     def traverse_breadth(self, with_root=False):
         """BFS (Breadth First Search) algorithm.
 
@@ -102,7 +186,7 @@ class Node:
 
         while queue:
             node = queue.popleft()
-            for sub in node.nodes:
+            for sub in node.children:
                 if sub not in visited:
                     visited.add(sub)
                     queue.append(sub)
@@ -124,10 +208,10 @@ class Node:
             queue.append(self)
 
         def collect_rec(node):
-            if not node.nodes:
+            if not node.children:
                 pass
             else:
-                for sub in node.nodes:
+                for sub in node.children:
                     if sub not in visited:
                         visited.add(sub)
                         queue.append(sub)
@@ -179,12 +263,146 @@ class Node:
                 yield node
 
     @classmethod
-    def _default_name(cls):
-        """Default name for node instantiation."""
+    def generate_new_name(cls):
+        """Default name generator for the new node instance.
 
-        return cls.__name__
+        You can override this behavior for adding numbers for non-unique names.
+        """
+
+        return cls.default_name_template
 
     def __str__(self):
         return f"{self.__class__.__name__}[{self.name}]"
 
     __repr__ = __str__
+
+
+# class TreeView:
+
+#     def __init__(self):
+#         pass
+
+#     def update(self):
+#         pass
+
+
+class Tree:
+    """Acyclic graph which provides nodes tree structure and querying interface.
+
+    Acyclic means that node can have only one relation.
+    Tree supports adding, removing, tagging and querying nodes.
+    """
+
+    __id__ = "__tree_level_nodes__"
+
+    def __init__(self):
+        self._storage = {}
+        self._graph = {}
+
+    @property
+    def id(self):
+        return self.__id__
+
+    def iterate_nodes(self):
+
+        return self._storage.values()
+
+    def add(self, node: Node, parent: Node = None):
+        """Insert node into the tree.
+
+        If parent is provided then all needed relations will be added too.
+        Inserting node with already registered ID has no any effects.
+
+        If you want to reparent already inserted node use `reparent` method.
+
+        :param node: node to insert
+        :param parent: parent node, must have `.id` property
+        """
+
+        if node.id in self._storage:
+            return
+
+        self._storage[node.id] = node
+
+        if parent is None:
+            parent = self
+
+        self._graph.setdefault(parent.id, []).append(node.id)
+
+        node.on_node_add()
+
+    def remove(self, node: Node):
+        """Remove node from the tree and cleanup it's relations.
+
+        All nodes that have `node` as parent will be deleted too.
+        Removing node which ID is not registered has no any effects.
+        """
+
+        if node.id not in self._storage:
+            return
+
+        self._storage.pop(node.id)
+        sub_ids = self._graph.pop(node.id, None)
+        #for self._graph
+
+        node.on_node_remove()
+
+    def parent_for(self, node: Node, required=True) -> Node:
+        """Return parent node for the given one."""
+
+        for parent_id, child_ids in self._graph.items():
+            if node.id in child_ids:
+                return self._storage[parent_id]
+
+        if required:
+            raise ValueError(f"No node with ID '{node.id}' was found")
+
+    def children_for(self, node: Node, required=True):
+
+        children_ids = self._graph.get(node.id, [])
+        if required and not children_ids:
+            raise ValueError(f"Node '{node.id}' has no children.")
+
+        return [self._storage[child_id] for child_id in children_ids]
+
+    def traverse_breadth(self):
+        """BFS (Breadth First Search) algorithm.
+
+        Traverses nodes layer by layer.
+        """
+
+        # self is the root node
+        visited = {self}
+        queue = deque([self])
+
+        while queue:
+            node = queue.popleft()
+            for sub_id in self._graph.get(node.id, []):
+                sub = self._storage[sub_id]
+                if sub not in visited:
+                    visited.add(sub)
+                    queue.append(sub)
+                    yield sub
+
+    # TODO: implement lazy version
+    def traverse_depth(self):
+        """DFS (Depth First Search) algorithm.
+
+        Traverses nodes branch by branch.
+        """
+
+        visited = set()
+        queue = []
+
+        def collect_rec(node):
+            if not node.children:
+                pass
+            else:
+                for sub in node.children:
+                    if sub not in visited:
+                        visited.add(sub)
+                        queue.append(sub)
+                        collect_rec(sub)
+
+        collect_rec(self)
+        return queue

@@ -6,7 +6,7 @@ import logging
 import typing
 from typing import List, Union
 
-from eaf.node import Node
+from eaf.node import Node, Tree
 
 
 if typing.TYPE_CHECKING:
@@ -17,7 +17,7 @@ if typing.TYPE_CHECKING:
 LOG = logging.getLogger(__name__)
 
 
-class State(Node):
+class State:
     """Base class for application states.
 
     State is a container for objects. User should add and remove objects via
@@ -32,6 +32,8 @@ class State(Node):
         self._app = app
         self._actor = None
 
+        self.scene_graph = Tree()
+
     def postinit(self):
         """Do all instantiations that require prepared State object."""
 
@@ -41,8 +43,7 @@ class State(Node):
         """Common way to get useful information for triggered state."""
 
         LOG.debug(
-            "Triggering %s state with %s and %s", self.__class__.__name__,
-            args, kwargs
+            "Triggering %s state with %s and %s", self.__class__.__name__, args, kwargs
         )
 
     @property
@@ -65,7 +66,7 @@ class State(Node):
     def objects(self):
         """State's objects getter."""
 
-        return self.nodes
+        return list(self.scene_graph.traverse_breadth())
 
     def events(self):
         "Event handler, called by `Application.loop` method."
@@ -85,17 +86,15 @@ class State(Node):
         self.app.renderer.present()
 
     # pylint: disable=arguments-differ
-    def add(self, obj: Union[Object, List[Object]]):
+    def add(self, obj: Object):
         """Add GameObject to State's list of objects.
 
         State will call Object.update(dt) and pass to render all it's objects
         every frame.
         """
 
-        obj = list(obj) if isinstance(obj, list) else [obj]
-
         LOG.debug("[%s] Adding %s", self, obj)
-        super().add(obj)
+        self.scene_graph.add(obj)
 
     def remove(self, obj: Object):
         """Remove object from State's object tree.
@@ -103,14 +102,10 @@ class State(Node):
         Removed objects should be collected by GC.
         """
 
-        LOG.debug("[%s]: removing %s", obj)
+        LOG.debug("[%s]: removing %s", self, obj)
 
-        try:
-            super().remove(obj)
-        except ValueError:
-            LOG.exception("Object %s is not in State's object tree.", obj)
-        finally:
-            del obj
+        self.scene_graph.remove(obj)
+        del obj
 
     def __str__(self):
         return f"{self.__class__.__name__}"
