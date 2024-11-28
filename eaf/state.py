@@ -5,12 +5,11 @@ from __future__ import annotations
 import logging
 import typing
 from operator import attrgetter
-from typing import List, Sequence, Union, Iterable
 
 
 if typing.TYPE_CHECKING:
     from eaf.app import Application
-    from eaf.render import Renderer, Renderable
+    from eaf.render import Renderable, Renderer
 
 
 LOG = logging.getLogger(__name__)
@@ -24,59 +23,59 @@ class State:
     refer to state objects to not cause memory leaks.
     """
 
-    def __init__(self, app: Application):
+    def __init__(self, app: Application) -> None:
         LOG.info("Instantiating %s state.", self.__class__.__name__)
 
         self._app = app
-        self._renderer: Renderer = app.renderer
         self._actor = None
 
-        self._objects: List[Renderable] = []
+        self._objects: list[Renderable] = []
 
-    def postinit(self):
+    def postinit(self) -> None:
         """Do all instantiations that require prepared State object."""
 
         LOG.debug("Post init %s state.", self.__class__.__name__)
 
-    def trigger(self, *args, **kwargs):
+    def trigger(self, *args, **kwargs) -> None:
         """Common way to get useful information for triggered state."""
 
-        LOG.debug(
-            "Triggering %s state with %s and %s", self.__class__.__name__, args, kwargs
-        )
+        LOG.debug("Triggering %s state with %s and %s", self.__class__.__name__, args, kwargs)
 
     @property
     def app(self) -> Application:
         """State's owner getter."""
+
         return self._app
 
     @property
     def actor(self) -> object:
         """Controllable object getter."""
+
         return self._actor
 
     @actor.setter
-    def actor(self, val):
+    def actor(self, val) -> None:
         """Controllable object setter."""
 
         self._actor = val
 
-    def events(self):
-        "Event handler, called by `Application.loop` method."
-        raise NotImplementedError
+    def events(self) -> None:
+        """Event handler, called by `Application.loop` method."""
 
-    def update(self, dt: int):
+        raise NotImplementedError()
+
+    def update(self, dt: int) -> None:
         """Update handler, called every frame."""
 
         for obj in self._objects:
             obj.update(dt)
 
-    def render(self):
+    def render(self) -> None:
         """Render handler, called every frame."""
 
-        self._renderer.clear()
-        self._renderer.render_objects(self._objects)
-        self._renderer.present()
+        self.app.renderer.clear()
+        self.app.renderer.render_objects(self._objects)
+        self.app.renderer.present()
 
     # TODO: [object-system]
     #  * implement GameObject common class for using in states
@@ -85,7 +84,7 @@ class State:
     #  render at the screen, because they must register in state via this func
     #  as others. This is temporary decision as attempt to create playable game
     #  due to deadline.
-    def add(self, obj: Union[Renderable, List[Renderable]]):
+    def add(self, obj: Renderable | list[Renderable]) -> None:
         """Add GameObject to State's list of objects.
 
         State will call GameObject.update() and pass to render all it's objects
@@ -106,7 +105,7 @@ class State:
 
         self._objects.sort(key=attrgetter("render_priority"))
 
-    def remove(self, obj: Renderable):
+    def remove(self, obj: Renderable) -> None:
         """Remove object from State's list of objects.
 
         Removed objects should be collected by GC.
@@ -125,5 +124,5 @@ class State:
         finally:
             del obj
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.__class__.__name__}"

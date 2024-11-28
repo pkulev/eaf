@@ -8,7 +8,7 @@ Also means Extensible As Fuck.
 
 from eaf.app import Application
 from eaf.core import Vec3
-from eaf.render import Image, Renderer, Renderable
+from eaf.render import Image, Renderable, Renderer
 from eaf.state import State
 from eaf.timer import Timer
 

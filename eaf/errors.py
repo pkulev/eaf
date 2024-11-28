@@ -8,19 +8,19 @@ class Error(Exception):
 class ApplicationNotInitializedError(Error):
     """Raise when try to get not initialized application."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("Application not initialized.")
 
 
 class ApplicationIsEmpty(Error):
     """Raise when try to get state from empty application."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("Application has no registered states.")
 
 
 class ApplicationStateIsNotRegistered(Error):
     """Raise when try to get state which was not registered."""
 
-    def __init__(self, name: str):
+    def __init__(self, name: str) -> None:
         super().__init__(f"State '{name}' is not registered.")

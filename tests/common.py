@@ -5,7 +5,7 @@ class StateMock(State):
     """Mock State interface."""
 
     def __init__(self, app):
-        super(StateMock, self).__init__(app)
+        super().__init__(app)
         self.loop_count = 1
 
         def noop():

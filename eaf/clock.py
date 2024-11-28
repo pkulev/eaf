@@ -12,27 +12,27 @@ class Clock:
     FPS_COUNT_NUMBER = 10
     """Number of FPS values to keep for calculating average FPS."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._mspf = 0
         self._previous_tick = 0
         self._current_tick = self._get_ticks_ms()
         self._tick_time = 0
-        self._fps_values = []
+        self._fps_values: list[int] = []
 
     @staticmethod
-    def _get_ticks_ms():
+    def _get_ticks_ms() -> int:
         """Return ticks clock are rely on."""
 
         return int(time.monotonic() * 1000)
 
-    def _save_fps(self, value: int):
+    def _save_fps(self, value: int) -> None:
         """Save FPS value and crop list if needed."""
 
         self._fps_values.append(value)
         if len(self._fps_values) > self.FPS_COUNT_NUMBER:
             self._fps_values.pop(0)
 
-    def tick(self, framerate=0.0):
+    def tick(self, framerate: float = 0.0) -> int:
         """Update the clock.
 
         :param float framerate: expected FPS
