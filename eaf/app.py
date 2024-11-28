@@ -10,18 +10,11 @@ from __future__ import annotations
 import typing
 import weakref
 
-from typing import (
-    Dict,
-    Type,
-    Optional,
-)
-
 # TODO: move out into ioloop integration framework
 from tornado import ioloop
 
 import eaf.core
 import eaf.errors
-
 from eaf.clock import Clock
 from eaf.render import Renderer
 
@@ -42,13 +35,16 @@ class Application:
     """Instance of the current application."""
 
     def __init__(
-        self, renderer: Renderer = Renderer("dummy"), event_queue=None, fps: int = 30
-    ):
-        self._renderer = renderer
+        self,
+        renderer: Renderer | None = None,
+        event_queue: None = None,  # TODO: implement event queue abstraction
+        fps: int = 30,
+    ) -> None:
+        self._renderer = renderer or Renderer("dummy")
         self._event_queue = event_queue
 
-        self._state: Optional[State] = None
-        self._states: Dict[str, State] = {}
+        self._state: State | None = None
+        self._states: dict[str, State] = {}
         self._fps = fps
 
         self._clock = Clock()
@@ -56,13 +52,13 @@ class Application:
 
         self._ioloop = ioloop.IOLoop.current()
         tick = weakref.WeakMethod(self.tick)
-        self._pc = ioloop.PeriodicCallback(lambda: tick()(), fps)
+        self._pc = ioloop.PeriodicCallback(tick(), fps)
         self._pc.start()
 
         if Application.__instance__ is None or Application.__instance__() is None:
             Application.__instance__ = weakref.ref(self)
 
-    def tick(self):
+    def tick(self) -> None:
         """Executes every frame."""
 
         if not self._state:
@@ -80,10 +76,15 @@ class Application:
     def current(cls) -> Application:
         """Return the current application instance."""
 
-        if cls.__instance__ is None or cls.__instance__() is None:
+        if cls.__instance__ is None:
             raise eaf.errors.ApplicationNotInitializedError()
 
-        return cls.__instance__()
+        application = cls.__instance__()
+
+        if application is None:
+            raise eaf.errors.ApplicationNotInitializedError()
+
+        return application
 
     @property
     def state(self) -> State:
@@ -95,7 +96,7 @@ class Application:
             raise eaf.errors.ApplicationIsEmpty()
 
     @state.setter
-    def state(self, name: str):
+    def state(self, name: str) -> None:
         """Current state setter."""
 
         if name in self._states:
@@ -104,12 +105,12 @@ class Application:
             raise eaf.errors.ApplicationStateIsNotRegistered(name)
 
     @property
-    def states(self) -> Dict[str, State]:
+    def states(self) -> dict[str, State]:
         """State names to State classes mapping."""
 
         return self._states
 
-    def register(self, state: Type[State]):
+    def register(self, state: type[State]) -> None:
         """Add new state and initiate it with owner application.
 
         :param state: state class to register
@@ -134,19 +135,19 @@ class Application:
         if len(self._states) > 1:
             self._state = previous_state
 
-    def deregister(self, name: str):
+    def deregister(self, name: str) -> None:
         """Remove existing state."""
 
         state = self._states.pop(name)
         del state
 
-    def trigger_state(self, state: str, *args, **kwargs):
+    def trigger_state(self, state: str, *args, **kwargs) -> None:
         """Change current state and pass args and kwargs to it."""
 
         self.state = state  # type: ignore
         self.state.trigger(*args, **kwargs)
 
-    def trigger_reinit(self, name: str):
+    def trigger_reinit(self, name: str) -> None:
         """Deregister state, register again and make it current."""
 
         state = self.states[name].__class__
@@ -162,7 +163,7 @@ class Application:
         return self._renderer
 
     @property
-    def event_queue(self):
+    def event_queue(self) -> None:
         """Application's event queue getter."""
 
         return self._event_queue
@@ -174,7 +175,7 @@ class Application:
         return self._fps
 
     @fps.setter
-    def fps(self, val: int):
+    def fps(self, val: int) -> None:
         """Desired FPS setter."""
 
         self._fps = int(val)
@@ -191,7 +192,7 @@ class Application:
 
         return self._clock
 
-    def start(self):
+    def start(self) -> None:
         """Start main application loop."""
 
         if not self._state:
@@ -199,7 +200,7 @@ class Application:
 
         self._ioloop.start()
 
-    def stop(self):
+    def stop(self) -> None:
         """Stop application."""
 
         self._pc.stop()

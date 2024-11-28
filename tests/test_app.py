@@ -4,10 +4,9 @@ import pytest
 
 import eaf.app
 import eaf.errors
-
 from eaf.app import Application
 
-from .common import StateMock, AnotherStateMock
+from .common import AnotherStateMock, StateMock
 
 
 def test_empty_application():
@@ -18,7 +17,7 @@ def test_empty_application():
     assert eaf.app.current() is app
     assert Application.current() is app
 
-    assert pytest.raises(eaf.errors.ApplicationIsEmpty, lambda: app.state)
+    assert pytest.raises(eaf.errors.ApplicationIsEmpty, lambda app=app: app.state)
     assert pytest.raises(eaf.errors.ApplicationIsEmpty, app.start)
 
     assert app.renderer is not None

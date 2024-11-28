@@ -1,7 +1,6 @@
 import pytest
 
 import eaf.errors
-
 from eaf.app import Application
 from eaf.state import State
 

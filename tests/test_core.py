@@ -16,7 +16,7 @@ def test_vec3_operationa():
     assert b.y == by
     assert b.z == bz
 
-    assert repr(a) == "Vec3(x={0}, y={1}, z={2})".format(a.x, a.y, a.z)
+    assert repr(a) == f"Vec3(x={a.x}, y={a.y}, z={a.z})"
 
     assert a + b == Vec3(ax + bx, ay + by, az + bz)
     assert a - b == Vec3(ax - bx, ay - by, az - bz)

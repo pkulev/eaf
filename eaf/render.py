@@ -4,56 +4,62 @@ from __future__ import annotations
 
 import typing
 
-from abc import ABCMeta, abstractmethod
-from typing import List
-
 
 if typing.TYPE_CHECKING:
     from eaf.core import Vec3
 
 
-class Image(metaclass=ABCMeta):
+class Image:
     """Base image class.
 
     Image must implement protocol between Renderer and Renderable itself.
     """
 
 
-class Renderable(metaclass=ABCMeta):
+class Renderable:
     """Base class for renderable objects.
 
     .. class-variables::
 
-    * compound (bool): if object consists of other renderables
-
-    * render_priority (int): priority for renderer, greater -> rendered later
+    * compound:
+    * render_priority: priority for renderer, greater -> rendered later
     """
 
     # TODO: this is not the place
-    compound = False
-    render_priority = 0
+    compound: bool = False
+    """Whether an object consists of other renderables."""
 
-    def __init__(self, pos: Vec3):
+    render_priority: int = 0
+    """A priority value for renderer, greater -> rendered later."""
+
+    def __init__(self, pos: Vec3) -> None:
         self._pos = pos
 
         # Image is not required by constructor, but renderable entity should
         # provide it via setter or directly assign to _image.
-        self._image = None
+        self._image: Image | None = None
 
     @property
     def pos(self) -> Vec3:
         return self._pos
 
     @pos.setter
-    def pos(self, pos: Vec3):
+    def pos(self, pos: Vec3) -> None:
         self._pos = pos
 
     @property
     def image(self) -> Image:
+        """Image getter."""
+
+        if self._image is None:
+            raise ValueError("Image property must be set before accessing!")
+
         return self._image
 
     @image.setter
-    def image(self, image: Image):
+    def image(self, image: Image) -> None:
+        """Image setter."""
+
         self._image = image
 
     @property
@@ -61,10 +67,10 @@ class Renderable(metaclass=ABCMeta):
         return self.__class__.__name__
 
     # TODO: this is not the place too
-    def get_renderable_objects(self) -> List[Renderable]:
+    def get_renderable_objects(self) -> list[Renderable]:
         """If object is compound it must return its renderable objects."""
 
-        pass
+        raise NotImplementedError()
 
 
 class Renderer:
@@ -74,24 +80,24 @@ class Renderer:
     class makes.
     """
 
-    def __init__(self, screen):
+    def __init__(self, screen) -> None:
         self._screen = screen
 
     @property
     def screen(self):
         return self._screen
 
-    def clear(self):
+    def clear(self) -> None:
         pass
 
-    def render_objects(self, objects: List[Renderable]):
+    def render_objects(self, objects: list[Renderable]) -> None:
         pass
 
-    def present(self):
+    def present(self) -> None:
         pass
 
-    def get_width(self):
+    def get_width(self) -> None:
         pass
 
-    def get_height(self):
+    def get_height(self) -> None:
         pass
