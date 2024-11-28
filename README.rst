@@ -14,7 +14,7 @@ Also means Extensible As Fuck.
 Requirements
 ============
 
-* >=python-3.7
+* >=python-3.10
 * >=tornado-6.0
 
 Installation
@@ -33,7 +33,7 @@ Installation
 
 .. code-block:: console
 
-   $ poetry install
+   $ uv sync --extra dev
 
 Testing
 -------
