@@ -5,6 +5,13 @@ from __future__ import annotations
 from typing import Any
 
 
+class Object:
+    """"""
+
+    def update(self, dt: int) -> None:
+        """"""
+
+
 class Vec3:
     """3D vector representation."""
 

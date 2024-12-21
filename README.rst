@@ -40,13 +40,11 @@ Testing
 
 .. code-block:: console
 
-   $ poetry run pytest -s -v tests/  # run all tests
-   $ poetry run pytest --cov=eaf -s -v tests/  # run all tests with coverage
-   $ poetry run black eaf/ tests/  # autoformat code
-   $ # run type checking
-   $ poetry run pytest --mypy --mypy-ignore-missing-imports -s -v eaf/ tests/
-   $ # run code linting
-   $ poetry run pytest --pylint -s -v eaf/ tests/
+   $ poe test  # run all tests
+   $ poe test --cov=eaf  # run all tests with coverage
+   $ poe format [--fix]  # autoformat code
+   $ poe typecheck  # run type checking
+   $ poe lint [--fix]  # run code linting
 
 Documentation
 -------------

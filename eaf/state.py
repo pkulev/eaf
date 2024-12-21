@@ -9,6 +9,7 @@ from operator import attrgetter
 
 if typing.TYPE_CHECKING:
     from eaf.app import Application
+    from eaf.core import Object
     from eaf.render import Renderable
 
 
@@ -29,7 +30,9 @@ class State:
         self._app = app
         self._actor = None
 
-        self._objects: list[Renderable] = []
+        # TODO: Object, not nescessarily Renderable!
+        self._objects: list[Object] = []
+        self._renderable: list[Renderable] = []
 
     def postinit(self) -> None:
         """Do all instantiations that require prepared State object."""
@@ -85,10 +88,9 @@ class State:
     #  as others. This is temporary decision as attempt to create playable game
     #  due to deadline.
     def add(self, obj: Renderable | list[Renderable]) -> None:
-        """Add GameObject to State's list of objects.
+        """Add Object to State's list of objects.
 
-        State will call GameObject.update() and pass to render all it's objects
-        every frame.
+        State will call Object.update() and pass to the renderer all renderables every frame.
         """
 
         obj = list(obj) if isinstance(obj, list) else [obj]

@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import typing
 
+from .core import Object
+
 
 if typing.TYPE_CHECKING:
     from eaf.core import Vec3
@@ -16,7 +18,7 @@ class Image:
     """
 
 
-class Renderable:
+class Renderable(Object):
     """Base class for renderable objects.
 
     .. class-variables::
