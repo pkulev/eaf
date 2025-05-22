@@ -1,5 +1,4 @@
 import uuid
-from typing import Optional
 
 from eaf.core import Vec3
 from eaf.node import Node
@@ -14,7 +13,7 @@ class Object(Node):
     managers.
     """
 
-    def __init__(self, pos: Optional[Vec3] = None):
+    def __init__(self, pos: Vec3 | None = None) -> None:
         super().__init__()
 
         if pos is None:
@@ -24,7 +23,7 @@ class Object(Node):
         self._id = uuid.uuid4()
 
     @property
-    def id(self):
+    def id(self) -> uuid.uuid4:
         """Object uinique identifier."""
 
         return self._id
@@ -42,12 +41,12 @@ class Object(Node):
         return self._pos
 
     @pos.setter
-    def pos(self, pos: Vec3):
+    def pos(self, pos: Vec3) -> None:
         """Object's position setter."""
 
         self._pos = pos
 
-    def update(self, dt: int):
+    def update(self, dt: int) -> None:
         """Update object, called every frame by the state."""
 
         raise NotImplementedError
